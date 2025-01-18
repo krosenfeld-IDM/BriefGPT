@@ -261,7 +261,10 @@ def load_dir_chat_embeddings(file_path):
     embeddings = OpenAIEmbeddings()
     try:
         db = FAISS.load_local(
-            folder_path="directory_embeddings", index_name=name, embeddings=embeddings, allow_dangerous_deserialization=True
+            folder_path="directory_embeddings",
+            index_name=name,
+            embeddings=embeddings,
+            allow_dangerous_deserialization=True,
         )
         st.success("Embeddings loaded successfully.")
     except Exception:

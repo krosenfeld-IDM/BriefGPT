@@ -47,7 +47,10 @@ def load_chat_embeddings(file_path):
     name = os.path.split(file_path)[1].split(".")[0]
     embeddings = OpenAIEmbeddings()
     db = FAISS.load_local(
-        folder_path="embeddings", index_name=name, embeddings=embeddings, allow_dangerous_deserialization=True
+        folder_path="embeddings",
+        index_name=name,
+        embeddings=embeddings,
+        allow_dangerous_deserialization=True,
     )
     return db
 
