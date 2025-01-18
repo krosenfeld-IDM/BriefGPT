@@ -14,7 +14,6 @@ from nltk.tokenize import word_tokenize
 
 from my_prompts import chat_prompt, hypothetical_prompt
 
-from dotenv import load_dotenv
 
 from summary_utils import doc_loader, remove_special_tokens, directory_loader
 
@@ -91,7 +90,7 @@ def qa_from_db(question, db, llm_name, hypothetical):
     reranked_results = rerank_fuzzy_matching(question, results)
     reranked_content = [result.page_content for result in reranked_results]
 
-    if type(llm_name) != str:
+    if type(llm_name) is not str:
         message = f'Answer the user question based on the context. Question: {question} Context: {reranked_content[:2]} Answer:'
     else:
         message = f'{chat_prompt} ---------- Context: {reranked_content} -------- User Question: {question} ---------- Response:'
@@ -112,7 +111,7 @@ def source_formatter(sources):
     return final_string
 
 def create_llm(llm_name):
-    if type(llm_name) != str:
+    if type(llm_name) is not str:
         return llm_name
     else:
         llm = OpenAI(model_name=llm_name)

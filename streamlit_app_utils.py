@@ -44,7 +44,7 @@ def check_gpt_4():
     try:
         ChatOpenAI(model_name='gpt-4o').call_as_llm('Hi')
         return True
-    except Exception as e:
+    except Exception:
         return False
 
 
@@ -192,7 +192,7 @@ def validate_input(file_or_transcript, use_gpt_4):
 
     :return: True if the input is valid, False otherwise
     """
-    if file_or_transcript == None:
+    if file_or_transcript is None:
         st.warning("Please upload a file or enter a YouTube URL.")
         return False
 
@@ -247,7 +247,7 @@ def load_dir_chat_embeddings(file_path):
     try:
         db = FAISS.load_local(folder_path='directory_embeddings', index_name=name, embeddings=embeddings)
         st.success('Embeddings loaded successfully.')
-    except Exception as e:
+    except Exception:
         st.warning('Loading embeddings failed. Please try again.')
         return None
 

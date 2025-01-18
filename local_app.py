@@ -1,7 +1,6 @@
 import os
 
 import streamlit as st
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 from streamlit_chat import message as st_message
 
@@ -56,10 +55,10 @@ def chat():
         st.session_state.db = db
         st.session_state.history = []
 
-    user_input = st.text_input('Enter your question', key='text_input')
+    st.text_input('Enter your question', key='text_input')
 
     if st.button('Ask') and 'db' in st.session_state:
-        answer = generate_answer(st.session_state.db, st.session_state.llm)
+        generate_answer(st.session_state.db, st.session_state.llm)
 
 
     if 'history' not in st.session_state:

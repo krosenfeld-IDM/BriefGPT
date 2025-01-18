@@ -1,7 +1,6 @@
 import os
 import streamlit as st
 from streamlit_chat import message as st_message
-from dotenv import load_dotenv
 
 from chat_utils import create_and_save_directory_embeddings
 from streamlit_app_utils import process_summarize_button, generate_answer, load_db_from_file_and_create_if_not_exists, validate_api_key, load_dir_chat_embeddings
@@ -10,7 +9,6 @@ from summary_utils import transcript_loader
 
 import pandas as pd
 
-import glob
 
 
 
@@ -107,10 +105,10 @@ def chat():
                     st.success('Directory loaded successfully')
                     st.session_state.history = []
 
-    user_input = st.text_input('Enter your question', key='text_input')
+    st.text_input('Enter your question', key='text_input')
 
     if st.button('Ask') and 'db' in st.session_state and validate_api_key(model_name):
-        answer = generate_answer(st.session_state.db, model_name, hypothetical)
+        generate_answer(st.session_state.db, model_name, hypothetical)
 
     if 'history' not in st.session_state:
         st.session_state.history = []
