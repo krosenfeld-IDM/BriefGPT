@@ -11,3 +11,4 @@ matplotlib
 PyPDF2
 pypdf
 faiss-cpu
+python-dotenv
