@@ -17,8 +17,6 @@ import glob
 
 #Youtube stuff is kinda broken! I'll fix it soon.
 
-load_dotenv('test.env')
-
 st.set_page_config(page_title='BriefGPT')
 
 accepted_filetypes = ['.txt', '.pdf', '.epub']

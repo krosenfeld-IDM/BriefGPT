@@ -1,3 +1,13 @@
 langchain==0.0.169
+openai==0.27.6
 transformers
 streamlit
+streamlit-chat
+fuzzywuzzy
+nltk
+tiktoken
+scikit-learn
+matplotlib
+PyPDF2
+pypdf
+faiss-cpu
