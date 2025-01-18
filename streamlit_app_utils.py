@@ -52,7 +52,7 @@ def check_gpt_4():
     :return: True if the user has access to GPT-4o, False otherwise.
     """
     try:
-        ChatOpenAI(model_name="gpt-4o").call_as_llm("Hi")
+        ChatOpenAI(model_name="gpt-4o").invoke("Hi")
         return True
     except Exception:
         return False
@@ -95,7 +95,7 @@ def token_minimum(doc, minimum=2000):
 
 def validate_api_key(model_name="gpt-4o-mini"):
     try:
-        ChatOpenAI(model_name=model_name).call_as_llm("Hi")
+        ChatOpenAI(model_name=model_name).invoke("Hi")
         print("API Key is valid")
         return True
     except Exception as e:
@@ -261,7 +261,7 @@ def load_dir_chat_embeddings(file_path):
     embeddings = OpenAIEmbeddings()
     try:
         db = FAISS.load_local(
-            folder_path="directory_embeddings", index_name=name, embeddings=embeddings
+            folder_path="directory_embeddings", index_name=name, embeddings=embeddings, allow_dangerous_deserialization=True
         )
         st.success("Embeddings loaded successfully.")
     except Exception:
