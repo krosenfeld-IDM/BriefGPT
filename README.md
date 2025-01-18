@@ -11,8 +11,6 @@ Please note this is experimental - it will be significantly slower and the quali
 ![chat](https://i.imgur.com/ipgvsgb.gif)
 
 
-
-
 # Setup
 1. Clone the repository
 2. Download all requirements
@@ -22,6 +20,22 @@ Please note this is experimental - it will be significantly slower and the quali
 ```streamlit run main.py```
 5. Add your PDF's or .txt's to the documents folder in the project directory
 6. If using epubs, ensure you have pandoc installed and added to PATH
+
+You may also need to install the data (e.g.,):
+```
+python -m nltk.downloader all -d /home/user/nltk_data
+```
+
+# For the VM:
+```
+streamlit run main.py --server.address 127.0.0.1 --server.port 8501
+```
+on your local machine:
+```
+ssh -L 8000:127.0.0.1:8501 user@host
+```
+and then point your browser to:
+http://127.0.0.1:8000/
 
 
 
