@@ -4,6 +4,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
 
 
 from fuzzywuzzy import fuzz
@@ -47,10 +48,8 @@ def create_and_save_chat_embeddings(file_path):
 def load_chat_embeddings(file_path):
     name = os.path.split(file_path)[1].split('.')[0]
     embeddings = OpenAIEmbeddings()
-    db = FAISS.load_local(folder_path='embeddings', index_name=name, embeddings=embeddings)
+    db = FAISS.load_local(folder_path='embeddings', index_name=name, embeddings=embeddings, allow_dangerous_deserialization=True)
     return db
-
-
 
 
 def results_from_db(db:FAISS, question, num_results=10):
@@ -96,7 +95,7 @@ def qa_from_db(question, db, llm_name, hypothetical):
     else:
         message = f'{chat_prompt} ---------- Context: {reranked_content} -------- User Question: {question} ---------- Response:'
     formatted_sources = source_formatter(reranked_results)
-    output = llm(message)
+    output = llm.invoke(message).content
     return output, formatted_sources
 
 
@@ -115,12 +114,12 @@ def create_llm(llm_name):
     if type(llm_name) != str:
         return llm_name
     else:
-        llm = OpenAI(model_name=llm_name)
+        llm = ChatOpenAI(model_name=llm_name)
     return llm
 
 def hypothetical_document_embeddings(question, llm):
     message = f'{hypothetical_prompt} {question} :'
-    output = llm(message)
+    output = llm.invoke(message).content
     print("output: ", output)
     return output
 
