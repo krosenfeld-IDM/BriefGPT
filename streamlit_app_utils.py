@@ -35,14 +35,14 @@ def pdf_to_text(pdf_file):
 
 def check_gpt_4():
     """
-    Check if the user has access to GPT-4.
+    Check if the user has access to GPT-4o.
 
     :param api_key: The user's OpenAI API key.
 
-    :return: True if the user has access to GPT-4, False otherwise.
+    :return: True if the user has access to GPT-4o, False otherwise.
     """
     try:
-        ChatOpenAI(model_name='gpt-4').call_as_llm('Hi')
+        ChatOpenAI(model_name='gpt-4o').call_as_llm('Hi')
         return True
     except Exception as e:
         return False
@@ -84,7 +84,7 @@ def token_minimum(doc, minimum=2000):
     return True
 
 
-def validate_api_key(model_name='gpt-3.5-turbo'):
+def validate_api_key(model_name='gpt-4o-mini'):
     try:
         ChatOpenAI(model_name=model_name).call_as_llm('Hi')
         print('API Key is valid')
@@ -106,9 +106,9 @@ def create_chat_model_for_summary(use_gpt_4):
     :return: A chat model.
     """
     if use_gpt_4:
-        return ChatOpenAI(temperature=0, max_tokens=500, model_name='gpt-3.5-turbo')
+        return ChatOpenAI(temperature=0, max_tokens=500, model_name='gpt-4o')
     else:
-        return ChatOpenAI(temperature=0, max_tokens=250, model_name='gpt-3.5-turbo')
+        return ChatOpenAI(temperature=0, max_tokens=250, model_name='gpt-4o-mini')
 
 
 def process_summarize_button(file_or_transcript, use_gpt_4, find_clusters, file=True):
