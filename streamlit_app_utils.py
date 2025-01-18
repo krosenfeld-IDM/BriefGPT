@@ -6,7 +6,12 @@ from langchain import FAISS
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
 
-from chat_utils import load_chat_embeddings, create_and_save_chat_embeddings, qa_from_db, doc_loader
+from chat_utils import (
+    load_chat_embeddings,
+    create_and_save_chat_embeddings,
+    qa_from_db,
+    doc_loader,
+)
 
 import streamlit as st
 
@@ -14,7 +19,12 @@ from my_prompts import file_map, file_combine, youtube_map, youtube_combine
 
 import os
 
-from summary_utils import doc_to_text, token_counter, summary_prompt_creator, doc_to_final_summary
+from summary_utils import (
+    doc_to_text,
+    token_counter,
+    summary_prompt_creator,
+    doc_to_final_summary,
+)
 
 
 def pdf_to_text(pdf_file):
@@ -30,7 +40,7 @@ def pdf_to_text(pdf_file):
     for i in range(len(pdf_reader.pages)):
         p = pdf_reader.pages[i]
         text.write(p.extract_text())
-    return text.getvalue().encode('utf-8')
+    return text.getvalue().encode("utf-8")
 
 
 def check_gpt_4():
@@ -42,11 +52,10 @@ def check_gpt_4():
     :return: True if the user has access to GPT-4o, False otherwise.
     """
     try:
-        ChatOpenAI(model_name='gpt-4o').call_as_llm('Hi')
+        ChatOpenAI(model_name="gpt-4o").call_as_llm("Hi")
         return True
     except Exception:
         return False
-
 
 
 def token_limit(doc, maximum=200000):
@@ -84,15 +93,15 @@ def token_minimum(doc, minimum=2000):
     return True
 
 
-def validate_api_key(model_name='gpt-4o-mini'):
+def validate_api_key(model_name="gpt-4o-mini"):
     try:
-        ChatOpenAI(model_name=model_name).call_as_llm('Hi')
-        print('API Key is valid')
+        ChatOpenAI(model_name=model_name).call_as_llm("Hi")
+        print("API Key is valid")
         return True
     except Exception as e:
         print(e)
-        st.warning('API key is invalid or OpenAI is having issues.')
-        print('Invalid API key.')
+        st.warning("API key is invalid or OpenAI is having issues.")
+        print("Invalid API key.")
 
 
 def create_chat_model_for_summary(use_gpt_4):
@@ -106,9 +115,9 @@ def create_chat_model_for_summary(use_gpt_4):
     :return: A chat model.
     """
     if use_gpt_4:
-        return ChatOpenAI(temperature=0, max_tokens=500, model_name='gpt-4o')
+        return ChatOpenAI(temperature=0, max_tokens=500, model_name="gpt-4o")
     else:
-        return ChatOpenAI(temperature=0, max_tokens=250, model_name='gpt-4o-mini')
+        return ChatOpenAI(temperature=0, max_tokens=250, model_name="gpt-4o-mini")
 
 
 def process_summarize_button(file_or_transcript, use_gpt_4, find_clusters, file=True):
@@ -129,13 +138,12 @@ def process_summarize_button(file_or_transcript, use_gpt_4, find_clusters, file=
         return
 
     with st.spinner("Summarizing... please wait..."):
-
         if file:
             doc = doc_loader(file_or_transcript)
             map_prompt = file_map
             combine_prompt = file_combine
             head, tail = os.path.split(file_or_transcript)
-            name = tail.split('.')[0]
+            name = tail.split(".")[0]
 
         else:
             doc = file_or_transcript
@@ -144,24 +152,31 @@ def process_summarize_button(file_or_transcript, use_gpt_4, find_clusters, file=
             name = str(file_or_transcript)[30:44].strip()
 
         llm = create_chat_model_for_summary(use_gpt_4)
-        initial_prompt_list = summary_prompt_creator(map_prompt, 'text', llm)
-        final_prompt_list = summary_prompt_creator(combine_prompt, 'text', llm)
+        initial_prompt_list = summary_prompt_creator(map_prompt, "text", llm)
+        final_prompt_list = summary_prompt_creator(combine_prompt, "text", llm)
 
         if not validate_doc_size(doc):
             return
 
         if find_clusters:
-            summary = doc_to_final_summary(doc, 10, initial_prompt_list, final_prompt_list, use_gpt_4, find_clusters)
+            summary = doc_to_final_summary(
+                doc,
+                10,
+                initial_prompt_list,
+                final_prompt_list,
+                use_gpt_4,
+                find_clusters,
+            )
 
         else:
-            summary = doc_to_final_summary(doc, 10, initial_prompt_list, final_prompt_list, use_gpt_4)
+            summary = doc_to_final_summary(
+                doc, 10, initial_prompt_list, final_prompt_list, use_gpt_4
+            )
 
         st.markdown(summary, unsafe_allow_html=True)
-        with open(f'summaries/{name}_summary.txt', 'w') as f:
+        with open(f"summaries/{name}_summary.txt", "w") as f:
             f.write(summary)
-        st.text(f' Summary saved to summaries/{name}_summary.txt')
-
-
+        st.text(f" Summary saved to summaries/{name}_summary.txt")
 
 
 def validate_doc_size(doc):
@@ -173,11 +188,11 @@ def validate_doc_size(doc):
     :return: True if the doc is valid, False otherwise
     """
     if not token_limit(doc, 800000):
-        st.warning('File or transcript too big!')
+        st.warning("File or transcript too big!")
         return False
 
     if not token_minimum(doc, 2000):
-        st.warning('File or transcript too small!')
+        st.warning("File or transcript too small!")
         return False
     return True
 
@@ -197,11 +212,11 @@ def validate_input(file_or_transcript, use_gpt_4):
         return False
 
     if not validate_api_key():
-        st.warning('Key not valid or API is down.')
+        st.warning("Key not valid or API is down.")
         return False
 
     if use_gpt_4 and not check_gpt_4():
-        st.warning('Key not valid for GPT-4.')
+        st.warning("Key not valid for GPT-4.")
         return False
 
     return True
@@ -210,45 +225,47 @@ def validate_input(file_or_transcript, use_gpt_4):
 def generate_answer(db=None, llm_model=None, hypothetical=False):
     user_message = st.session_state.text_input
     if db and user_message.strip() != "":
-        with st.spinner('Generating answer...'):
-            print('About to call API')
+        with st.spinner("Generating answer..."):
+            print("About to call API")
             sys_message, sources = qa_from_db(user_message, db, llm_model, hypothetical)
-            print('Done calling API')
-            st.session_state.history.append({'message': user_message, 'is_user': True})
-            st.session_state.history.append({'message': sys_message, 'is_user': False})
+            print("Done calling API")
+            st.session_state.history.append({"message": user_message, "is_user": True})
+            st.session_state.history.append({"message": sys_message, "is_user": False})
             st.session_state.sources = []
             st.session_state.sources.append(sources)
             return sys_message, sources
     else:
         print(user_message)
-        print('failed')
+        print("failed")
         print(db)
 
 
 def load_db_from_file_and_create_if_not_exists(file_path):
-    with st.spinner('Loading chat embeddings...'):
+    with st.spinner("Loading chat embeddings..."):
         try:
             db = load_chat_embeddings(file_path)
-            print('success')
+            print("success")
         except RuntimeError:
-            print('not found')
+            print("not found")
             create_and_save_chat_embeddings(file_path)
             db = load_chat_embeddings(file_path)
     if db:
-        st.success('Loaded successfully! Start a chat below.')
+        st.success("Loaded successfully! Start a chat below.")
     else:
-        st.warning('Something went wrong... failed to load chat embeddings.')
+        st.warning("Something went wrong... failed to load chat embeddings.")
     return db
 
 
 def load_dir_chat_embeddings(file_path):
-    name = os.path.split(file_path)[1].split('.')[0]
+    name = os.path.split(file_path)[1].split(".")[0]
     embeddings = OpenAIEmbeddings()
     try:
-        db = FAISS.load_local(folder_path='directory_embeddings', index_name=name, embeddings=embeddings)
-        st.success('Embeddings loaded successfully.')
+        db = FAISS.load_local(
+            folder_path="directory_embeddings", index_name=name, embeddings=embeddings
+        )
+        st.success("Embeddings loaded successfully.")
     except Exception:
-        st.warning('Loading embeddings failed. Please try again.')
+        st.warning("Loading embeddings failed. Please try again.")
         return None
 
     return db

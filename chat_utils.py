@@ -18,8 +18,8 @@ from my_prompts import chat_prompt, hypothetical_prompt
 from summary_utils import doc_loader, remove_special_tokens, directory_loader
 
 
-nltk.download('stopwords')
-nltk.download('punkt')
+nltk.download("stopwords")
+nltk.download("punkt")
 
 
 def create_and_save_directory_embeddings(directory_path, name):
@@ -29,37 +29,38 @@ def create_and_save_directory_embeddings(directory_path, name):
     split_docs = splitter.split_documents(docs)
     processed_split_docs = remove_special_tokens(split_docs)
     db = FAISS.from_documents(processed_split_docs, embeddings)
-    db.save_local(folder_path='directory_embeddings', index_name=name)
+    db.save_local(folder_path="directory_embeddings", index_name=name)
     return db
 
+
 def create_and_save_chat_embeddings(file_path):
-    name = os.path.split(file_path)[1].split('.')[0]
+    name = os.path.split(file_path)[1].split(".")[0]
     embeddings = OpenAIEmbeddings()
     doc = doc_loader(file_path)
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     split_docs = splitter.split_documents(doc)
     processed_split_docs = remove_special_tokens(split_docs)
     db = FAISS.from_documents(processed_split_docs, embeddings)
-    db.save_local(folder_path='embeddings', index_name=name)
+    db.save_local(folder_path="embeddings", index_name=name)
 
 
 def load_chat_embeddings(file_path):
-    name = os.path.split(file_path)[1].split('.')[0]
+    name = os.path.split(file_path)[1].split(".")[0]
     embeddings = OpenAIEmbeddings()
-    db = FAISS.load_local(folder_path='embeddings', index_name=name, embeddings=embeddings)
+    db = FAISS.load_local(
+        folder_path="embeddings", index_name=name, embeddings=embeddings
+    )
     return db
 
 
-
-
-def results_from_db(db:FAISS, question, num_results=10):
+def results_from_db(db: FAISS, question, num_results=10):
     results = db.similarity_search(question, k=num_results)
     return results
 
 
 def rerank_fuzzy_matching(question, results, num_results=5):
     filtered_question = filter_stopwords(question)
-    if filtered_question == '':
+    if filtered_question == "":
         return results[-5:]
     scores_and_results = []
     for result in results:
@@ -74,8 +75,8 @@ def rerank_fuzzy_matching(question, results, num_results=5):
 
 def filter_stopwords(question):
     words = word_tokenize(question)
-    filtered_words = [word for word in words if word not in stopwords.words('english')]
-    filtered_sentence = ' '.join(filtered_words)
+    filtered_words = [word for word in words if word not in stopwords.words("english")]
+    filtered_sentence = " ".join(filtered_words)
     return filtered_sentence
 
 
@@ -83,7 +84,9 @@ def qa_from_db(question, db, llm_name, hypothetical):
     llm = create_llm(llm_name)
     if hypothetical:
         hypothetical_llm = create_llm(llm_name)
-        hypothetical_answer = hypothetical_document_embeddings(question, hypothetical_llm)
+        hypothetical_answer = hypothetical_document_embeddings(
+            question, hypothetical_llm
+        )
         results = results_from_db(db, hypothetical_answer)
     else:
         results = results_from_db(db, question)
@@ -91,24 +94,26 @@ def qa_from_db(question, db, llm_name, hypothetical):
     reranked_content = [result.page_content for result in reranked_results]
 
     if type(llm_name) is not str:
-        message = f'Answer the user question based on the context. Question: {question} Context: {reranked_content[:2]} Answer:'
+        message = f"Answer the user question based on the context. Question: {question} Context: {reranked_content[:2]} Answer:"
     else:
-        message = f'{chat_prompt} ---------- Context: {reranked_content} -------- User Question: {question} ---------- Response:'
+        message = f"{chat_prompt} ---------- Context: {reranked_content} -------- User Question: {question} ---------- Response:"
     formatted_sources = source_formatter(reranked_results)
     output = llm(message)
     return output, formatted_sources
 
 
-
 def source_formatter(sources):
     formatted_strings = []
     for doc in sources:
-        source_name = doc.metadata['source'].split('\\')[-1]
-        source_content = doc.page_content.replace('\n', ' ')  # Replacing newlines with spaces
+        source_name = doc.metadata["source"].split("\\")[-1]
+        source_content = doc.page_content.replace(
+            "\n", " "
+        )  # Replacing newlines with spaces
         formatted_string = f"Source name: {source_name} | Source content: '{source_content}' - end of content"
         formatted_strings.append(formatted_string)
-    final_string = '\n\n\n'.join(formatted_strings)
+    final_string = "\n\n\n".join(formatted_strings)
     return final_string
+
 
 def create_llm(llm_name):
     if type(llm_name) is not str:
@@ -117,17 +122,9 @@ def create_llm(llm_name):
         llm = OpenAI(model_name=llm_name)
     return llm
 
+
 def hypothetical_document_embeddings(question, llm):
-    message = f'{hypothetical_prompt} {question} :'
+    message = f"{hypothetical_prompt} {question} :"
     output = llm(message)
     print("output: ", output)
     return output
-
-
-
-
-
-
-
-
-

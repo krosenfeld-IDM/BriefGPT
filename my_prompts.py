@@ -63,4 +63,3 @@ For example, if the user question is "who are the authors?", the response should
 The user's question is:
 
 """
-

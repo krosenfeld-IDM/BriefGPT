@@ -7,7 +7,12 @@ import tiktoken
 from langchain import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from langchain.chat_models import ChatOpenAI
-from langchain.document_loaders import YoutubeLoader, TextLoader, PyPDFLoader, UnstructuredEPubLoader
+from langchain.document_loaders import (
+    YoutubeLoader,
+    TextLoader,
+    PyPDFLoader,
+    UnstructuredEPubLoader,
+)
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.schema import Document
 
@@ -28,15 +33,17 @@ def doc_loader(file_path: str):
 
     :return: A langchain Document object.
     """
-    if file_path.endswith('.txt'):
+    if file_path.endswith(".txt"):
         loader = TextLoader(file_path)
-    elif file_path.endswith('.pdf'):
+    elif file_path.endswith(".pdf"):
         loader = PyPDFLoader(file_path)
-    elif file_path.endswith('.epub'):
+    elif file_path.endswith(".epub"):
         try:
             loader = UnstructuredEPubLoader(file_path)
         except Exception:
-            st.warning('Error loading file - ensure you have pandoc installed and added to PATH.')
+            st.warning(
+                "Error loading file - ensure you have pandoc installed and added to PATH."
+            )
             return None
 
     return loader.load()
@@ -47,20 +54,19 @@ def directory_loader(directory):
     documents = []
     mixed_documents = []
     for file in files:
-        if file.endswith('.txt'):
+        if file.endswith(".txt"):
             loader = TextLoader(os.path.join(directory, file))
             documents.append(loader.load())
-        elif file.endswith('.pdf'):
+        elif file.endswith(".pdf"):
             loader = PyPDFLoader(os.path.join(directory, file))
             documents.append(loader.load())
-        elif file.endswith('.epub'):
+        elif file.endswith(".epub"):
             loader = UnstructuredEPubLoader(os.path.join(directory, file))
             documents.append(loader.load())
     for doc in documents:
         for section in doc:
             mixed_documents.append(section)
     return mixed_documents
-
 
 
 def token_counter(text: str):
@@ -71,7 +77,7 @@ def token_counter(text: str):
 
     :return: The number of tokens in the text.
     """
-    encoding = tiktoken.get_encoding('cl100k_base')
+    encoding = tiktoken.get_encoding("cl100k_base")
     token_list = encoding.encode(text, disallowed_special=())
     tokens = len(token_list)
     return tokens
@@ -85,24 +91,36 @@ def doc_to_text(document):
 
     :return: A string of text.
     """
-    text = ''
+    text = ""
     for i in document:
         text += i.page_content
-    special_tokens = ['>|endoftext|', '<|fim_prefix|', '<|fim_middle|', '<|fim_suffix|', '<|endofprompt|']
+    special_tokens = [
+        ">|endoftext|",
+        "<|fim_prefix|",
+        "<|fim_middle|",
+        "<|fim_suffix|",
+        "<|endofprompt|",
+    ]
     words = text.split()
     filtered_words = [word for word in words if word not in special_tokens]
-    text = ' '.join(filtered_words)
+    text = " ".join(filtered_words)
     return text
 
+
 def remove_special_tokens(docs):
-    special_tokens = ['>|endoftext|', '<|fim_prefix|', '<|fim_middle|', '<|fim_suffix|', '<|endofprompt|>']
+    special_tokens = [
+        ">|endoftext|",
+        "<|fim_prefix|",
+        "<|fim_middle|",
+        "<|fim_suffix|",
+        "<|endofprompt|>",
+    ]
     for doc in docs:
         content = doc.page_content
         for special in special_tokens:
-            content = content.replace(special, '')
+            content = content.replace(special, "")
             doc.page_content = content
     return docs
-
 
 
 def embed_docs_openai(docs):
@@ -134,7 +152,7 @@ def kmeans_clustering(vectors, num_clusters=None):
     if num_clusters is None:
         inertia_values = calculate_inertia(vectors)
         num_clusters = determine_optimal_clusters(inertia_values)
-        print(f'Optimal number of clusters: {num_clusters}')
+        print(f"Optimal number of clusters: {num_clusters}")
 
     kmeans = KMeans(n_clusters=num_clusters, random_state=42).fit(vectors)
     return kmeans
@@ -182,8 +200,12 @@ def create_summarize_chain(prompt_list):
 
     :return: A langchain summarize chain.
     """
-    template = PromptTemplate(template=prompt_list[0], input_variables=([prompt_list[1]]))
-    chain = load_summarize_chain(llm=prompt_list[2], chain_type='stuff', prompt=template)
+    template = PromptTemplate(
+        template=prompt_list[0], input_variables=([prompt_list[1]])
+    )
+    chain = load_summarize_chain(
+        llm=prompt_list[2], chain_type="stuff", prompt=template
+    )
     return chain
 
 
@@ -203,7 +225,10 @@ def parallelize_summaries(summary_docs, initial_chain, progress_bar, max_workers
     """
     doc_summaries = []
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_doc = {executor.submit(initial_chain.run, [doc]): doc.page_content for doc in summary_docs}
+        future_to_doc = {
+            executor.submit(initial_chain.run, [doc]): doc.page_content
+            for doc in summary_docs
+        }
 
         for future in as_completed(future_to_doc):
             doc = future_to_doc[future]
@@ -212,16 +237,15 @@ def parallelize_summaries(summary_docs, initial_chain, progress_bar, max_workers
                 summary = future.result()
 
             except Exception as exc:
-                print(f'{doc} generated an exception: {exc}')
+                print(f"{doc} generated an exception: {exc}")
 
             else:
                 doc_summaries.append(summary)
                 num = (len(doc_summaries)) / (len(summary_docs) + 1)
-                progress_bar.progress(num)  # Remove this line and all references to it if you are not using Streamlit.
+                progress_bar.progress(
+                    num
+                )  # Remove this line and all references to it if you are not using Streamlit.
     return doc_summaries
-
-
-
 
 
 def create_summary_from_docs(summary_docs, initial_chain, final_sum_list, use_gpt_4):
@@ -239,35 +263,47 @@ def create_summary_from_docs(summary_docs, initial_chain, final_sum_list, use_gp
     :return: A string containing the summary.
     """
 
-    progress = st.progress(0)  # Create a progress bar to show the progress of summarization.
+    progress = st.progress(
+        0
+    )  # Create a progress bar to show the progress of summarization.
     # Remove this line and all references to it if you are not using Streamlit.
 
-    doc_summaries = parallelize_summaries(summary_docs, initial_chain, progress_bar=progress)
+    doc_summaries = parallelize_summaries(
+        summary_docs, initial_chain, progress_bar=progress
+    )
 
-    summaries = '\n'.join(doc_summaries)
+    summaries = "\n".join(doc_summaries)
     count = token_counter(summaries)
 
     if use_gpt_4:
         max_tokens = 7500 - int(count)
-        model = 'gpt-4'
+        model = "gpt-4"
 
     else:
         max_tokens = 3800 - int(count)
-        model = 'gpt-3.5-turbo'
+        model = "gpt-3.5-turbo"
 
-    final_sum_list[2] = ChatOpenAI(temperature=.7, max_tokens=max_tokens, model_name=model)
+    final_sum_list[2] = ChatOpenAI(
+        temperature=0.7, max_tokens=max_tokens, model_name=model
+    )
     final_sum_chain = create_summarize_chain(final_sum_list)
     summaries = Document(page_content=summaries)
     final_summary = final_sum_chain.run([summaries])
 
-    progress.progress(1.0)  # Remove this line and all references to it if you are not using Streamlit.
-    time.sleep(0.4)  # Remove this line and all references to it if you are not using Streamlit.
+    progress.progress(
+        1.0
+    )  # Remove this line and all references to it if you are not using Streamlit.
+    time.sleep(
+        0.4
+    )  # Remove this line and all references to it if you are not using Streamlit.
     progress.empty()  # Remove this line and all references to it if you are not using Streamlit.
 
     return final_summary
 
 
-def split_by_tokens(doc, num_clusters, ratio=5, minimum_tokens=200, maximum_tokens=2000):
+def split_by_tokens(
+    doc, num_clusters, ratio=5, minimum_tokens=200, maximum_tokens=2000
+):
     """
     Split a  langchain Document object into a list of smaller langchain Document objects.
 
@@ -288,7 +324,7 @@ def split_by_tokens(doc, num_clusters, ratio=5, minimum_tokens=200, maximum_toke
     chunks = num_clusters * ratio
     max_tokens = int(tokens / chunks)
     max_tokens = max(minimum_tokens, min(max_tokens, maximum_tokens))
-    overlap = int(max_tokens/10)
+    overlap = int(max_tokens / 10)
 
     splitter = TokenTextSplitter(chunk_size=max_tokens, chunk_overlap=overlap)
     split_doc = splitter.create_documents([text_doc])
@@ -321,7 +357,14 @@ def extract_summary_docs(langchain_document, num_clusters, find_clusters):
     return summary_docs
 
 
-def doc_to_final_summary(langchain_document, num_clusters, initial_prompt_list, final_prompt_list, use_gpt_4, find_clusters=False):
+def doc_to_final_summary(
+    langchain_document,
+    num_clusters,
+    initial_prompt_list,
+    final_prompt_list,
+    use_gpt_4,
+    find_clusters=False,
+):
     """
     Automatically summarize a single langchain Document object using multiple langchain summarize chains.
 
@@ -341,7 +384,9 @@ def doc_to_final_summary(langchain_document, num_clusters, initial_prompt_list, 
     """
     initial_prompt_list = create_summarize_chain(initial_prompt_list)
     summary_docs = extract_summary_docs(langchain_document, num_clusters, find_clusters)
-    output = create_summary_from_docs(summary_docs, initial_prompt_list, final_prompt_list, use_gpt_4)
+    output = create_summary_from_docs(
+        summary_docs, initial_prompt_list, final_prompt_list, use_gpt_4
+    )
     return output
 
 
@@ -370,20 +415,19 @@ def extract_video_id(video_url):
     :return: The ID of the YouTube video.
     """
     parsed_url = urllib.parse.urlparse(video_url)
-    if parsed_url.hostname == 'youtu.be':
+    if parsed_url.hostname == "youtu.be":
         return parsed_url.path[1:]
 
-    elif parsed_url.hostname in ('www.youtube.com', 'youtube.com'):
-
-        if parsed_url.path == '/watch':
+    elif parsed_url.hostname in ("www.youtube.com", "youtube.com"):
+        if parsed_url.path == "/watch":
             p = urllib.parse.parse_qs(parsed_url.query)
-            return p.get('v', [None])[0]
+            return p.get("v", [None])[0]
 
-        elif parsed_url.path.startswith('/embed/'):
-            return parsed_url.path.split('/embed/')[1]
+        elif parsed_url.path.startswith("/embed/"):
+            return parsed_url.path.split("/embed/")[1]
 
-        elif parsed_url.path.startswith('/v/'):
-            return parsed_url.path.split('/v/')[1]
+        elif parsed_url.path.startswith("/v/"):
+            return parsed_url.path.split("/v/")[1]
 
     return None
 
@@ -427,8 +471,8 @@ def plot_elbow(inertia_values):
     :return: None.
     """
     plt.plot(inertia_values)
-    plt.xlabel('Number of Clusters')
-    plt.ylabel('Inertia')
+    plt.xlabel("Number of Clusters")
+    plt.ylabel("Inertia")
     plt.show()
 
 
@@ -444,7 +488,9 @@ def determine_optimal_clusters(inertia_values):
     for i in range(len(inertia_values) - 1):
         p1 = np.array([i + 1, inertia_values[i]])
         p2 = np.array([i + 2, inertia_values[i + 1]])
-        d = np.linalg.norm(np.cross(p2 - p1, p1 - np.array([1,0]))) / np.linalg.norm(p2 - p1)
+        d = np.linalg.norm(np.cross(p2 - p1, p1 - np.array([1, 0]))) / np.linalg.norm(
+            p2 - p1
+        )
         distances.append(d)
     optimal_clusters = distances.index(max(distances)) + 2
     return optimal_clusters
