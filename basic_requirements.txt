@@ -1,6 +1,6 @@
 langchain==0.3.14
 langchain-community
-openai
+openai==0.27.6
 transformers
 streamlit
 streamlit-chat
