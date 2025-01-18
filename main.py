@@ -67,7 +67,7 @@ def summarize():
 def chat():
     dir_or_doc = st.radio('Select a chat method', ('Document', 'Directory'))
     st.title('Chat')
-    model_name = st.radio('Select a model', ('gpt-3.5-turbo', 'gpt-4'))
+    model_name = st.radio('Select a model', ('gpt-4o-mini', 'gpt-4o'))
     hypothetical = st.checkbox('Use hypothetical embeddings', value=False)
     if dir_or_doc == 'Document':
         if 'text_input' not in st.session_state:
@@ -141,7 +141,7 @@ def documents():
 def compare_results():
     st.title('Compare')
     st.write("Compare retrieval results using hypothetical embeddings vs. normal embeddings. Support for comparing multiple models coming soon.")
-    model_name = 'gpt-3.5-turbo'
+    model_name = 'gpt-4o-mini'
 
     if 'text_input' not in st.session_state:
         st.session_state.text_input = ''
