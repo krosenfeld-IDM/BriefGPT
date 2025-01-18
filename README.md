@@ -12,7 +12,6 @@ Please note this is experimental - it will be significantly slower and the quali
 
 
 # Setup
-(Using python 3.10: `uv venv --python 3.10`)
 1. Clone the repository
 2. Download all requirements
 ``pip install -r requirements.txt``
@@ -21,6 +20,11 @@ Please note this is experimental - it will be significantly slower and the quali
 ```streamlit run main.py```
 5. Add your PDF's or .txt's to the documents folder in the project directory
 6. If using epubs, ensure you have pandoc installed and added to PATH
+
+You may also need to install the data (e.g.,):
+```
+python -m nltk.downloader all -d /home/user/nltk_data
+```
 
 # For the VM:
 ```
