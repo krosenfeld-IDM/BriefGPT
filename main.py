@@ -1,6 +1,7 @@
 import os
 import streamlit as st
 from streamlit_chat import message as st_message
+from dotenv import load_dotenv
 
 from chat_utils import create_and_save_directory_embeddings
 from streamlit_app_utils import process_summarize_button, generate_answer, load_db_from_file_and_create_if_not_exists, validate_api_key, load_dir_chat_embeddings
@@ -15,7 +16,6 @@ import glob
 
 
 #Youtube stuff is kinda broken! I'll fix it soon.
-
 
 st.set_page_config(page_title='BriefGPT')
 
@@ -198,9 +198,3 @@ st.sidebar.markdown(' [Github](https://github.com/e-johnstonn/docGPT)')
 st.sidebar.markdown('[More info on hypothetical embeddings here](https://arxiv.org/abs/2212.10496)', unsafe_allow_html=True)
 page = PAGES[selection]
 page()
-
-
-
-
-
-
