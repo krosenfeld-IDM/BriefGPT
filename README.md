@@ -12,6 +12,7 @@ Please note this is experimental - it will be significantly slower and the quali
 
 
 # Setup
+(Using python 3.10: `uv venv --python 3.10`)
 1. Clone the repository
 2. Download all requirements
 ``pip install -r requirements.txt``

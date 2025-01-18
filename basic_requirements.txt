@@ -1,3 +1,13 @@
-langchain==0.0.169
+langchain==0.3.14
 transformers
 streamlit
+streamlit-chat
+python-dotenv
+langchain-community
+fuzzywuzzy
+nltk
+tiktoken
+scikit-learn
+matplotlib
+PyPDF2
+openai
