@@ -127,6 +127,6 @@ def create_llm(llm_name):
 
 def hypothetical_document_embeddings(question, llm):
     message = f"{hypothetical_prompt} {question} :"
-    output = llm(message)
+    output = llm.invoke(message)
     print("output: ", output)
     return output
